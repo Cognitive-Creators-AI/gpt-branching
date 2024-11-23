@@ -1,17 +1,27 @@
 import React from 'react';
 import styles from './BranchTooltip.module.css';
 
-const BranchTooltip = ({ position, onBranch }) => {
+const BranchTooltip = ({ position, onBranch, selectedText }) => {
   if (!position) return null;
 
   const handleClick = (e) => {
+    // Prevent any selection changes
     e.preventDefault();
     e.stopPropagation();
-
-    console.log('[Branch] Branch button clicked');
+    
+    // Prevent the click from triggering a new selection
+    const selection = window.getSelection();
+    const range = selection.getRangeAt(0);
+    
     if (onBranch) {
       onBranch();
     }
+    
+    // Restore the selection after a short delay
+    setTimeout(() => {
+      selection.removeAllRanges();
+      selection.addRange(range);
+    }, 0);
   };
 
   return (
@@ -22,8 +32,14 @@ const BranchTooltip = ({ position, onBranch }) => {
         left: `${position.left}px`
       }}
       onClick={handleClick}
-      onMouseDown={(e) => e.stopPropagation()}
-      onMouseUp={(e) => e.stopPropagation()}
+      onMouseDown={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+      }}
+      onMouseUp={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+      }}
     >
       <svg width="16" height="16" viewBox="0 0 20 20" fill="white" xmlns="http://www.w3.org/2000/svg">
         <path d="M3.25 6.5C5.04493 6.5 6.5 5.04493 6.5 3.25C6.5 1.45507 5.04493 0 3.25 0C1.45507 0 0 1.45507 0 3.25C0 5.04493 1.45507 6.5 3.25 6.5Z" />

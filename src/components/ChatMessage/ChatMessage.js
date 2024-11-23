@@ -28,8 +28,6 @@ const ChatMessage = ({ role, content, allowBranching = true, onBranch }) => {
         return;
       }
 
-      console.log('[Branch] Text selected:', text);
-
       const range = selection.getRangeAt(0);
       const textElement = textRef.current;
       const textRect = textElement.getBoundingClientRect();
@@ -94,12 +92,8 @@ const ChatMessage = ({ role, content, allowBranching = true, onBranch }) => {
     };
   }, [role, allowBranching]);
 
-  const handleBranch = (e) => {
-    e.preventDefault(); // Prevent the click from clearing selection
-    e.stopPropagation(); // Stop event from bubbling up
-
+  const handleBranch = () => {
     if (onBranch && selectedText) {
-      console.log('[Branch] Initiating branch with text:', selectedText);
       onBranch(selectedText);
       // Clear selection and state after branching
       setTooltipPosition(null);
@@ -125,6 +119,7 @@ const ChatMessage = ({ role, content, allowBranching = true, onBranch }) => {
             <BranchTooltip 
               position={tooltipPosition}
               onBranch={handleBranch}
+              selectedText={selectedText}
             />
           )}
         </div>
