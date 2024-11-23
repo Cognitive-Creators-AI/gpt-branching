@@ -17,17 +17,17 @@ function App() {
   const [branchedChat, setBranchedChat] = useState(null);
   const [isExiting, setIsExiting] = useState(false);
   const [input, setInput] = useState('');
-  const [isMainLoading, setIsMainLoading] = useState(false);
-  const [isBranchLoading, setIsBranchLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSendMessage = async () => {
     if (!input.trim()) return;
     const isBranched = !!branchedChat;
-    isBranched ? setIsBranchLoading(true) : setIsMainLoading(true);
+    setIsLoading(true);
 
     const userMessage = { role: 'user', content: input };
+    const loadingMessage = { role: 'assistant', content: '...' };
     const targetChat = isBranched ? branchedChat : mainChat;
-    const newMessages = [...targetChat.messages, userMessage];
+    const newMessages = [...targetChat.messages, userMessage, loadingMessage];
 
     console.log('[Chat] Sending message:', {
       isBranchedChat: isBranched,
@@ -35,7 +35,7 @@ function App() {
       allMessages: newMessages
     });
 
-    // Update UI immediately
+    // Update UI immediately with loading message
     if (isBranched) {
       setBranchedChat(prev => ({ ...prev, messages: newMessages }));
     } else {
@@ -45,7 +45,7 @@ function App() {
     setInput('');
 
     try {
-      const response = await axios.post(`${API_URL}/chat`, { messages: newMessages });
+      const response = await axios.post(`${API_URL}/chat`, { messages: targetChat.messages.concat(userMessage) });
       console.log('[Chat] Received response:', response.data);
 
       const assistantMessage = {
@@ -53,37 +53,53 @@ function App() {
         content: response.data.reply,
       };
 
-      // Update with AI response
+      // Replace loading message with actual response
+      const finalMessages = [...targetChat.messages, userMessage, assistantMessage];
+      
       if (isBranched) {
         setBranchedChat(prev => ({
           ...prev,
-          messages: [...prev.messages, assistantMessage]
+          messages: finalMessages
         }));
       } else {
         setMainChat(prev => ({
           ...prev,
-          messages: [...prev.messages, assistantMessage]
+          messages: finalMessages
         }));
       }
     } catch (error) {
       console.error('[Chat] Error sending message:', error);
+      // Remove loading message on error
+      const messagesWithoutLoading = [...targetChat.messages, userMessage];
+      if (isBranched) {
+        setBranchedChat(prev => ({
+          ...prev,
+          messages: messagesWithoutLoading
+        }));
+      } else {
+        setMainChat(prev => ({
+          ...prev,
+          messages: messagesWithoutLoading
+        }));
+      }
     } finally {
-      isBranched ? setIsBranchLoading(false) : setIsMainLoading(false);
+      setIsLoading(false);
     }
   };
 
   const handleBranch = async (selectedText) => {
     console.log('[Branch] Creating new branch with context:', selectedText);
-    setIsBranchLoading(true);
+    setIsLoading(true);
 
     const initialMessage = { 
       role: 'user', 
       content: `Branch: "${selectedText}". Can we please explore this futher?.` 
     };
+    const loadingMessage = { role: 'assistant', content: '...' };
 
-    // Create branch immediately with just the user message
+    // Create branch immediately with loading message
     setBranchedChat({
-      messages: [initialMessage]
+      messages: [initialMessage, loadingMessage]
     });
 
     try {
@@ -99,17 +115,21 @@ function App() {
 
       console.log('[Branch] Received initial response:', response.data);
 
-      // Update branch with AI response
-      setBranchedChat(prev => ({
+      // Replace loading message with actual response
+      setBranchedChat({
         messages: [
-          ...prev.messages,
+          initialMessage,
           { role: 'assistant', content: response.data.reply }
         ]
-      }));
+      });
     } catch (error) {
       console.error('[Branch] Error creating branch:', error);
+      // Remove loading message on error
+      setBranchedChat({
+        messages: [initialMessage]
+      });
     } finally {
-      setIsBranchLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -140,7 +160,6 @@ function App() {
             messages={mainChat.messages}
             onBranch={handleBranch}
             hasBranch={!!branchedChat}
-            isLoading={isMainLoading}
           />
           {branchedChat && (
             <ChatContainer
@@ -148,7 +167,6 @@ function App() {
               onClose={closeBranchedChat}
               isBranched={true}
               isExiting={isExiting}
-              isLoading={isBranchLoading}
             />
           )}
         </div>
@@ -157,7 +175,7 @@ function App() {
             input={input}
             setInput={setInput}
             sendMessage={handleSendMessage}
-            isLoading={isMainLoading || isBranchLoading}
+            isLoading={isLoading}
           />
         </div>
       </main>

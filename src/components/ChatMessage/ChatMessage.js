@@ -3,10 +3,11 @@ import ReactMarkdown from 'react-markdown';
 import styles from './ChatMessage.module.css';
 import BranchTooltip from '../BranchTooltip/BranchTooltip';
 
-const ChatMessage = ({ role, content, allowBranching = true, onBranch, isLoading = false }) => {
+const ChatMessage = ({ role, content, allowBranching = true, onBranch }) => {
   const [tooltipPosition, setTooltipPosition] = useState(null);
   const [selectedText, setSelectedText] = useState('');
   const textRef = useRef(null);
+  const isLoading = content === '...';
 
   useEffect(() => {
     const handleSelection = (e) => {
