@@ -17,7 +17,6 @@ function App() {
   const [branchedChat, setBranchedChat] = useState(null);
   const [isExiting, setIsExiting] = useState(false);
   const [input, setInput] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
   const [isMainLoading, setIsMainLoading] = useState(false);
   const [isBranchLoading, setIsBranchLoading] = useState(false);
 
@@ -158,7 +157,7 @@ function App() {
             input={input}
             setInput={setInput}
             sendMessage={handleSendMessage}
-            isLoading={isLoading}
+            isLoading={isMainLoading || isBranchLoading}
           />
         </div>
       </main>
