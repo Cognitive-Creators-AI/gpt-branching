@@ -1,0 +1,25 @@
+.sidebar {
+  width: 260px;
+  background-color: var(--side-history);
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--border-color);
+}
+
+.newChat {
+  background-color: var(--message-box);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+  padding: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-bottom: 20px;
+  width: 100%;
+  text-align: left;
+}
+
+.chatHistory {
+  flex: 1;
+  overflow-y: auto;
+}

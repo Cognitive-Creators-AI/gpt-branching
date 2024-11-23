@@ -1,0 +1,21 @@
+.tooltip {
+  position: absolute;
+  background-color: var(--main-grey);
+  width: auto;
+  height: 32px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: 1px solid var(--border-color);
+  z-index: 1000;
+  color: var(--text-color);
+  transition: background-color 0.2s ease;
+  pointer-events: all;
+}
+
+.tooltip:hover {
+  background-color: var(--message-box);
+}
