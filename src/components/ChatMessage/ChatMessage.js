@@ -3,7 +3,7 @@ import ReactMarkdown from 'react-markdown';
 import styles from './ChatMessage.module.css';
 import BranchTooltip from '../BranchTooltip/BranchTooltip';
 
-const ChatMessage = ({ role, content, allowBranching = true, onBranch }) => {
+const ChatMessage = ({ role, content, allowBranching = true, onBranch, isLoading = false }) => {
   const [tooltipPosition, setTooltipPosition] = useState(null);
   const [selectedText, setSelectedText] = useState('');
   const textRef = useRef(null);
@@ -90,7 +90,7 @@ const ChatMessage = ({ role, content, allowBranching = true, onBranch }) => {
             </svg>
           </div>
         )}
-        <div ref={textRef} className={styles.text} style={{ position: 'relative' }}>
+        <div ref={textRef} className={`${styles.text} ${isLoading ? styles.loading : ''}`} style={{ position: 'relative' }}>
           <ReactMarkdown>{content}</ReactMarkdown>
           {tooltipPosition && (
             <BranchTooltip 

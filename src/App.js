@@ -18,23 +18,26 @@ function App() {
   const [isExiting, setIsExiting] = useState(false);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isMainLoading, setIsMainLoading] = useState(false);
+  const [isBranchLoading, setIsBranchLoading] = useState(false);
 
   const handleSendMessage = async () => {
     if (!input.trim()) return;
-    setIsLoading(true);
+    const isBranched = !!branchedChat;
+    isBranched ? setIsBranchLoading(true) : setIsMainLoading(true);
 
     const userMessage = { role: 'user', content: input };
-    const targetChat = branchedChat ? branchedChat : mainChat;
+    const targetChat = isBranched ? branchedChat : mainChat;
     const newMessages = [...targetChat.messages, userMessage];
 
     console.log('[Chat] Sending message:', {
-      isBranchedChat: !!branchedChat,
+      isBranchedChat: isBranched,
       message: userMessage,
       allMessages: newMessages
     });
 
     // Update UI immediately
-    if (branchedChat) {
+    if (isBranched) {
       setBranchedChat(prev => ({ ...prev, messages: newMessages }));
     } else {
       setMainChat(prev => ({ ...prev, messages: newMessages }));
@@ -52,7 +55,7 @@ function App() {
       };
 
       // Update with AI response
-      if (branchedChat) {
+      if (isBranched) {
         setBranchedChat(prev => ({
           ...prev,
           messages: [...prev.messages, assistantMessage]
@@ -66,13 +69,13 @@ function App() {
     } catch (error) {
       console.error('[Chat] Error sending message:', error);
     } finally {
-      setIsLoading(false);
+      isBranched ? setIsBranchLoading(false) : setIsMainLoading(false);
     }
   };
 
   const handleBranch = async (selectedText) => {
     console.log('[Branch] Creating new branch with context:', selectedText);
-    setIsLoading(true);
+    setIsBranchLoading(true);
 
     const initialMessage = { 
       role: 'user', 
@@ -107,7 +110,7 @@ function App() {
     } catch (error) {
       console.error('[Branch] Error creating branch:', error);
     } finally {
-      setIsLoading(false);
+      setIsBranchLoading(false);
     }
   };
 
@@ -138,6 +141,7 @@ function App() {
             messages={mainChat.messages}
             onBranch={handleBranch}
             hasBranch={!!branchedChat}
+            isLoading={isMainLoading}
           />
           {branchedChat && (
             <ChatContainer
@@ -145,6 +149,7 @@ function App() {
               onClose={closeBranchedChat}
               isBranched={true}
               isExiting={isExiting}
+              isLoading={isBranchLoading}
             />
           )}
         </div>
