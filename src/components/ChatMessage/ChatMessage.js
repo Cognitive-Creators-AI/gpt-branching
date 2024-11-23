@@ -50,10 +50,34 @@ const ChatMessage = ({ role, content, allowBranching = true, onBranch }) => {
     };
 
     const handleSelectionChange = () => {
-      if (!textRef.current?.contains(document.activeElement)) return;
-
       const selection = window.getSelection();
-      if (selection.toString().trim() === '') {
+      if (!selection.rangeCount) {
+        setTooltipPosition(null);
+        setSelectedText('');
+        return;
+      }
+
+      const range = selection.getRangeAt(0);
+      const textElement = textRef.current;
+
+      // Check if the range intersects with our text element
+      const textRange = document.createRange();
+      textRange.selectNode(textElement);
+
+      const isIntersecting = !(
+        range.compareBoundaryPoints(Range.END_TO_START, textRange) > 0 ||
+        range.compareBoundaryPoints(Range.START_TO_END, textRange) < 0
+      );
+
+      if (!isIntersecting || selection.toString().trim() === '') {
+        setTooltipPosition(null);
+        setSelectedText('');
+      }
+    };
+
+    // Handle clicks outside the message
+    const handleClickOutside = (e) => {
+      if (!textRef.current?.contains(e.target)) {
         setTooltipPosition(null);
         setSelectedText('');
       }
@@ -61,18 +85,22 @@ const ChatMessage = ({ role, content, allowBranching = true, onBranch }) => {
 
     document.addEventListener('mouseup', handleSelection);
     document.addEventListener('selectionchange', handleSelectionChange);
+    document.addEventListener('mousedown', handleClickOutside);
     
     return () => {
       document.removeEventListener('mouseup', handleSelection);
       document.removeEventListener('selectionchange', handleSelectionChange);
+      document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [role, allowBranching]);
 
-  const handleBranch = () => {
+  const handleBranch = (e) => {
+    e.preventDefault(); // Prevent the click from clearing selection
+    e.stopPropagation(); // Stop event from bubbling up
+
     if (onBranch && selectedText) {
       console.log('[Branch] Initiating branch with text:', selectedText);
-      const textToUse = selectedText; // Store the selected text
-      onBranch(textToUse); // Use the stored text
+      onBranch(selectedText);
       // Clear selection and state after branching
       setTooltipPosition(null);
       setSelectedText('');
