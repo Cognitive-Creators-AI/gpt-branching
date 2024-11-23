@@ -43,7 +43,7 @@ function App() {
     setInput('');
 
     try {
-      const response = await axios.post(`${API_URL}/api/chat`, { messages: newMessages });
+      const response = await axios.post(`${API_URL}/chat`, { messages: newMessages });
       console.log('[Chat] Received response:', response.data);
 
       const assistantMessage = {
@@ -88,7 +88,7 @@ function App() {
       console.log('[Branch] Sending initial message:', initialMessage);
       
       // Get initial AI response for the branch
-      const response = await axios.post(`${API_URL}/api/chat`, { 
+      const response = await axios.post(`${API_URL}/chat`, { 
         messages: [
           { role: 'system', content: 'You are starting a new conversation branch based on selected text from a previous conversation. Acknowledge the context and answer the user or ask for further information if needed.' },
           initialMessage
